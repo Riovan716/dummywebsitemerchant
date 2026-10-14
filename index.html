@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Mandiri - Merchant Monitoring & Early Warning System (EWS)</title>
+  <meta name="description" content="Dashboard monitoring performa merchant EDC, Livin' Merchant, dan Debitur Mikro KUM & KUR terintegrasi Bank Mandiri dengan Early Warning System proaktif.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="css/image/mandirilogo.png">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=2.1">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- =========================================================
+       APPLICATION LAYOUT: SIDEBAR & MAIN CONTENT
+       ========================================================= -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR NAVIGATION MENU -->
+    <aside class="app-sidebar" id="appSidebar">
+      
+      <!-- Brand & Title Header -->
+      <div class="sidebar-header">
+        <a href="index.html" class="mandiri-badge-logo" title="Bank Mandiri - Merchant Early Warning System">
+          <img src="css/image/mandirilogo.png" alt="Bank Mandiri" class="mandiri-logo-img">
+        </a>
+        <div class="sidebar-brand-text">
+          <div class="sidebar-brand-title">
+            Merchant EWS
+            <span class="tag-ews">LIVE</span>
+          </div>
+          <div class="sidebar-brand-sub">Early Warning System</div>
+        </div>
+      </div>
+
+      <!-- User Profile Card (Ratna Primasari - Branch Manager) -->
+      <div class="sidebar-user-box">
+        <div class="sidebar-avatar">
+          RP
+          <span class="online-status-dot" title="Sistem Terhubung"></span>
+        </div>
+        <div class="sidebar-user-meta">
+          <span class="sidebar-user-name">Ratna Primasari</span>
+          <span class="sidebar-user-role"><i class="fa-solid fa-crown" style="font-size: 0.65rem;"></i> Branch Manager</span>
+          <span class="sidebar-user-branch"><i class="fa-solid fa-location-dot" style="font-size: 0.65rem;"></i> Area Gading Serpong</span>
+        </div>
+      </div>
+
+      <!-- Sidebar Navigation Menu Items (Hanya Menu Utama) -->
+      <nav class="sidebar-nav">
+        
+        <div class="sidebar-nav-title">Menu Utama</div>
+        
+        <button class="sidebar-nav-item active" data-tab="overview" onclick="switchMainTab('overview', this)">
+          <div class="sidebar-nav-item-left">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Ringkasan & EWS</span>
+          </div>
+          <span class="sidebar-nav-badge badge-sidebar-neutral">14.8k</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="kur" onclick="switchMainTab('kur', this)">
+          <div class="sidebar-nav-item-left">
+            <i class="fa-solid fa-wheat-awn"></i>
+            <span>Debitur KUM & KUR</span>
+          </div>
+          <span class="sidebar-nav-badge badge-sidebar-kur">1,840</span>
+        </button>
+
+        <button class="sidebar-nav-item" data-tab="logs" onclick="switchMainTab('logs', this)">
+          <div class="sidebar-nav-item-left">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Log Tindakan & Visit</span>
+          </div>
+          <span class="sidebar-nav-badge badge-sidebar-neutral">Riwayat</span>
+        </button>
+
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <span>© 2026 Bank Mandiri</span>
+        <span style="color: #94a3b8;"><i class="fa-solid fa-shield"></i> EWS v2.4</span>
+      </div>
+
+    </aside>
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-content-wrap">
+
+      <!-- TOP HEADER BAR (BREADCRUMB, BRANCH SELECTOR, PROFILE) -->
+      <header class="top-header-bar">
+        <div class="header-left-title">
+          <!-- Mobile Hamburger Menu Button -->
+          <button class="header-mobile-toggle" onclick="toggleSidebar()" aria-label="Buka Menu Sidebar">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <div class="header-page-title">
+              <i class="fa-solid fa-building-columns" style="color: var(--mandiri-blue);"></i>
+              Merchant Monitoring Platform
+              <span class="tag-ews">EWS LIVE</span>
+            </div>
+            <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">
+              Supervisi: <strong>Ratna Primasari (Branch Manager)</strong> • Kawasan Bisnis Gading Serpong
+            </div>
+          </div>
+        </div>
+
+        <!-- Header Controls: Branch Filter, Date, Notif -->
+        <div class="header-controls">
+          
+          <!-- Filter Cabang Dropdown (Area Gading Serpong) -->
+          <div class="header-select-box" title="Pilih Kantor Cabang">
+            <i class="fa-solid fa-location-dot"></i>
+            <select id="branchAreaSelect" class="header-select" aria-label="Filter Wilayah Cabang">
+              <option value="Semua Cabang" selected>Semua Cabang (Area Gading Serpong)</option>
+              <option value="KC Gading Serpong">KC Gading Serpong</option>
+              <option value="KCP Springs Summarecon">KCP Springs Summarecon</option>
+              <option value="KCP Borobudur">KCP Borobudur</option>
+              <option value="KCP Curug">KCP Curug</option>
+            </select>
+          </div>
+
+          <!-- Period Selector -->
+          <div class="header-select-box" title="Periode Pelaporan">
+            <i class="fa-solid fa-calendar-days"></i>
+            <select class="header-select" aria-label="Periode Laporan">
+              <option value="oct-2026" selected>Oktober 2026 (Bulan Berjalan)</option>
+              <option value="sep-2026">September 2026</option>
+              <option value="q3-2026">Kuartal 3 (Q3 2026)</option>
+              <option value="ytd-2026">Year-to-Date (YTD 2026)</option>
+            </select>
+          </div>
+
+          <!-- Notification Bell -->
+          <button class="btn-notif-header" onclick="quickFilterFromSidebar('dormant')" title="3 Peringatan Merchant Dormant Mendesak">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notif-badge">3</span>
+          </button>
+
+        </div>
+      </header>
+
+
+      <!-- MAIN DASHBOARD CONTAINER -->
+      <main class="main-wrapper">
+
+    <!-- =========================================================
+         TAB 1: OVERVIEW & EARLY WARNING SYSTEM
+         ========================================================= -->
+    <div id="tabContentOverview">
+      
+      <!-- SUMMARY CARDS (KPI METRICS - Required Poin 1) -->
+      <section class="kpi-grid">
+        
+        <!-- CARD 1: Total Merchant Registered -->
+        <div class="kpi-card accent-navy">
+          <div class="kpi-header">
+            <div class="kpi-title-block">
+              <span class="kpi-title">Total Merchant Terdaftar</span>
+              <span style="font-size: 0.72rem; color: #64748b;">Area Mandiri Gading Serpong</span>
+            </div>
+            <div class="kpi-icon-wrap icon-blue">
+              <i class="fa-solid fa-shop"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-main-value">14,850</span>
+            <span class="kpi-trend trend-up">
+              <i class="fa-solid fa-arrow-trend-up"></i> +8.6% MoM
+            </span>
+          </div>
+          <div class="kpi-breakdown-row">
+            <span><i class="fa-solid fa-calculator" style="color: #0b5cab;"></i> <strong>8,420</strong> EDC Mandiri</span>
+            <span><i class="fa-solid fa-qrcode" style="color: #f5a623;"></i> <strong>6,430</strong> Livin' Merchant</span>
+          </div>
+        </div>
+
+        <!-- CARD 2: Merchant Aktif vs Pasif (Dormant) (Required Poin 1) -->
+        <div class="kpi-card accent-active">
+          <div class="kpi-header">
+            <div class="kpi-title-block">
+              <span class="kpi-title">Status Keaktifan Merchant</span>
+              <span style="font-size: 0.72rem; color: #64748b;">Rasio Transaksi 30 Hari Terakhir</span>
+            </div>
+            <div class="kpi-icon-wrap icon-green">
+              <i class="fa-solid fa-wave-pulse"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-main-value" style="color: #059669;">11,280</span>
+            <span style="font-size: 0.85rem; font-weight: 700; color: #059669;">(76.0% Aktif)</span>
+          </div>
+          <!-- Segmented Progress Bar -->
+          <div class="segmented-bar">
+            <div class="seg-item seg-active" style="width: 76.0%;" title="Aktif: 11,280 (76%)"></div>
+            <div class="seg-item seg-warning" style="width: 9.5%;" title="At-Risk (1-29 hari pasif): 1,410 (9.5%)"></div>
+            <div class="seg-item seg-dormant" style="width: 14.5%;" title="Dormant (>30 hari): 2,160 (14.5%)"></div>
+          </div>
+          <div class="status-legend-micro">
+            <div class="legend-item"><span class="dot-indicator dot-active"></span> Aktif: 11.2k</div>
+            <div class="legend-item"><span class="dot-indicator dot-warning"></span> At-Risk: 1.4k</div>
+            <div class="legend-item"><span class="dot-indicator dot-dormant"></span> Pasif: 2.1k</div>
+          </div>
+        </div>
+
+        <!-- CARD 3: Total Volume Transaksi (GTV) (Required Poin 1) -->
+        <div class="kpi-card accent-gold">
+          <div class="kpi-header">
+            <div class="kpi-title-block">
+              <span class="kpi-title">Total Volume Transaksi (GTV)</span>
+              <span style="font-size: 0.72rem; color: #64748b;">EDC & Livin' Merchant Bulan Ini</span>
+            </div>
+            <div class="kpi-icon-wrap icon-gold">
+              <i class="fa-solid fa-rupiah-sign"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-main-value">Rp 486.2 M</span>
+            <span class="kpi-trend trend-up">
+              <i class="fa-solid fa-arrow-trend-up"></i> +14.2% MoM
+            </span>
+          </div>
+          <div class="kpi-breakdown-row">
+            <span>EDC: <strong>Rp 318.5 M</strong></span>
+            <span>QRIS: <strong>Rp 167.7 M</strong></span>
+          </div>
+        </div>
+
+        <!-- CARD 4: Debitur Mikro KUM & KUR Bundling Index -->
+        <div class="kpi-card accent-kur">
+          <div class="kpi-header">
+            <div class="kpi-title-block">
+              <span class="kpi-title">Debitur Mikro Terbundling</span>
+              <span style="font-size: 0.72rem; color: #64748b;">Kesehatan Cashflow KUM/KUR</span>
+            </div>
+            <div class="kpi-icon-wrap icon-purple">
+              <i class="fa-solid fa-hand-holding-hand"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-main-value" style="color: #6d28d9;">1,840</span>
+            <span class="kpi-trend trend-up" style="background: #ede9fe; color: #6d28d9;">
+              <i class="fa-solid fa-shield-check"></i> 84.8% Sehat
+            </span>
+          </div>
+          <div class="kpi-breakdown-row">
+            <span>Baki Debet: <strong>Rp 142.8 M</strong></span>
+            <span style="color: #dc2626; font-weight: 700;"><i class="fa-solid fa-triangle-exclamation"></i> 82 Perlu Visit</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- EARLY WARNING PROACTIVE ALERT BANNER -->
+      <div class="ews-alert-strip">
+        <div class="ews-strip-left">
+          <div class="ews-badge-icon">
+            <i class="fa-solid fa-bell-concierge"></i>
+          </div>
+          <div>
+            <div class="ews-message-title">Early Warning System (EWS): Perhatian Khusus Cabang Diperlukan</div>
+            <div class="ews-message-desc">
+              Terdapat <strong>2.160 merchant dormant (>30 hari tanpa transaksi)</strong> dan <strong>82 debitur mikro KUM/KUR</strong> dengan omzet QRIS lebih rendah dari angsuran pinjaman bulanan.
+            </div>
+          </div>
+        </div>
+        <div class="ews-strip-actions">
+          <button class="btn-ews-filter" onclick="filterDormantOnly()">
+            <i class="fa-solid fa-triangle-exclamation"></i> Tampilkan Merchant Dormant
+          </button>
+        </div>
+      </div>
+
+      <!-- GRAFIK & VISUALISASI UTAMA (MAIN DASHBOARD WIDGETS - Required Poin 2) -->
+      <section class="widgets-grid">
+        
+        <!-- WIDGET 1: Tren Transaksi Harian / Bulanan (Required Poin 2) -->
+        <div class="widget-card">
+          <div class="widget-header">
+            <div class="widget-title-group">
+              <div class="widget-icon-box">
+                <i class="fa-solid fa-chart-area"></i>
+              </div>
+              <div>
+                <div class="widget-title">Tren Transaksi EDC vs Livin' Merchant</div>
+                <div class="widget-subtitle">Dinamika volume transaksi nominal (Miliar Rupiah)</div>
+              </div>
+            </div>
+            <!-- Granularity Pill Toggles -->
+            <div class="widget-actions">
+              <div class="pill-toggle-group">
+                <button class="pill-toggle-btn active" onclick="switchTrendGranularity('daily', this)">Harian</button>
+                <button class="pill-toggle-btn" onclick="switchTrendGranularity('weekly', this)">Mingguan</button>
+                <button class="pill-toggle-btn" onclick="switchTrendGranularity('monthly', this)">Bulanan</button>
+              </div>
+            </div>
+          </div>
+          <!-- Line Chart Canvas -->
+          <div class="chart-container-box">
+            <canvas id="transactionTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- WIDGET 2: Komposisi Tipe Merchant (Required Poin 2) -->
+        <div class="widget-card">
+          <div class="widget-header">
+            <div class="widget-title-group">
+              <div class="widget-icon-box" style="background: #fff7ed; color: #ea580c;">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <div>
+                <div class="widget-title">Komposisi Kategori Merchant</div>
+                <div class="widget-subtitle">Proporsi sektor usaha binaan cabang</div>
+              </div>
+            </div>
+          </div>
+          <div class="pie-summary-wrapper">
+            <!-- Doughnut Chart Canvas -->
+            <div class="pie-chart-box">
+              <canvas id="merchantCategoryChart"></canvas>
+            </div>
+            <!-- Legend Breakdown -->
+            <div class="pie-legend-list">
+              <div class="pie-legend-row">
+                <div class="legend-tag-left">
+                  <span class="legend-color-chip" style="background: #ea580c;"></span>
+                  <span>Restoran & F&B (Kafe, Rumah Makan)</span>
+                </div>
+                <span class="legend-value-right">34% (5,049)</span>
+              </div>
+              <div class="pie-legend-row">
+                <div class="legend-tag-left">
+                  <span class="legend-color-chip" style="background: #0284c7;"></span>
+                  <span>Grosir & Ritel (Minimarket, Toko)</span>
+                </div>
+                <span class="legend-value-right">28% (4,158)</span>
+              </div>
+              <div class="pie-legend-row">
+                <div class="legend-tag-left">
+                  <span class="legend-color-chip" style="background: #db2777;"></span>
+                  <span>Fashion & Lifestyle (Butik, Sepatu)</span>
+                </div>
+                <span class="legend-value-right">16% (2,376)</span>
+              </div>
+              <div class="pie-legend-row">
+                <div class="legend-tag-left">
+                  <span class="legend-color-chip" style="background: #7c3aed;"></span>
+                  <span>Debitur Mikro KUM & KUR Terbundling</span>
+                </div>
+                <span class="legend-value-right">14% (1,840)</span>
+              </div>
+              <div class="pie-legend-row">
+                <div class="legend-tag-left">
+                  <span class="legend-color-chip" style="background: #4f46e5;"></span>
+                  <span>Jasa, Otomotif & Kesehatan</span>
+                </div>
+                <span class="legend-value-right">8% (1,427)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- TABEL DATA MERCHANT & EARLY WARNING SYSTEM (Required Poin 3) -->
+      <section class="table-panel-card" id="merchantTablePanel">
+        
+        <!-- Table Toolbar: Search, Filter Badges, Service Filter -->
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            
+            <!-- Real-time Search Input -->
+            <div class="search-box-wrap">
+              <i class="fa-solid fa-magnifying-glass search-icon-pos"></i>
+              <input type="text" id="merchantSearchInput" class="search-input" placeholder="Cari nama merchant, nama owner, MID..." autocomplete="off">
+            </div>
+
+            <!-- Filter Badges / Pills -->
+            <div class="filter-pills-row">
+              <button class="status-filter-pill active" data-status="all">
+                Semua <span class="pill-count">14.8k</span>
+              </button>
+              <button class="status-filter-pill" data-status="active">
+                <i class="fa-solid fa-circle" style="color: #10b981; font-size: 0.6rem;"></i>
+                Aktif <span class="pill-count">11.2k</span>
+              </button>
+              <button class="status-filter-pill" data-status="warning">
+                <i class="fa-solid fa-circle" style="color: #f59e0b; font-size: 0.6rem;"></i>
+                At-Risk <span class="pill-count">1.4k</span>
+              </button>
+              <button class="status-filter-pill" data-status="dormant">
+                <i class="fa-solid fa-circle" style="color: #ef4444; font-size: 0.6rem;"></i>
+                Dormant (>30 Hari) <span class="pill-count">2.1k</span>
+              </button>
+              <button class="status-filter-pill" data-status="kur">
+                <i class="fa-solid fa-wheat-awn" style="color: #8b5cf6;"></i>
+                Debitur KUM/KUR <span class="pill-count">1.8k</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Toolbar Right: Service Type Filter -->
+          <div class="toolbar-right">
+            <select id="serviceFilterSelect" class="select-filter-service" aria-label="Filter Layanan">
+              <option value="all">Semua Jenis Layanan</option>
+              <option value="edc">Mesin EDC Mandiri</option>
+              <option value="livin">Livin' Merchant (QRIS)</option>
+              <option value="kur">Debitur KUR / KUM</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Interactive Table Body (Required Poin 3) -->
+        <div class="table-responsive">
+          <table class="merchant-table">
+            <thead>
+              <tr>
+                <th>Nama Merchant / Badan Usaha</th>
+                <th>Jenis Layanan & Kategori</th>
+                <th>Cabang / Wilayah</th>
+                <th>Status Keaktifan (EWS)</th>
+                <th>Transaksi (Bulan Ini)</th>
+                <th>Tren MoM</th>
+                <th style="min-width: 220px;">Aksi Proaktif Cabang</th>
+              </tr>
+            </thead>
+            <tbody id="merchantTableBody">
+              <!-- Populated dynamically via app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer Pagination -->
+        <div class="table-pagination-row">
+          <span id="tableFilteredCount">Menampilkan 12 merchant</span>
+          <div class="pagination-controls">
+            <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- =========================================================
+         TAB 2: MODUL KHUSUS: DEBITUR MIKRO KUM & KUR WATCHLIST (Required Poin 4)
+         ========================================================= -->
+    <div id="tabContentKur" style="display: none;">
+      
+      <div class="kur-watchlist-wrapper">
+        
+        <!-- Hero Header Box for KUM & KUR -->
+        <div class="kur-hero-card" style="background: linear-gradient(135deg, #002244 0%, #003876 50%, #0284c7 100%) !important; box-shadow: 0 10px 25px rgba(0, 56, 118, 0.3) !important;">
+          <div class="kur-hero-header">
+            <div>
+              <span class="kur-hero-badge"><i class="fa-solid fa-building-shield"></i> Modul Integrasi Kredit & Transaksi</span>
+              <h2 class="kur-hero-title">Debitur Mikro KUM & KUR Transaction Health Watchlist</h2>
+              <p class="kur-hero-desc">
+                Monitoring otomatis untuk memantau rasio kesehatan cashflow dari debitur Kredit Usaha Mikro (KUM) dan Kredit Usaha Rakyat (KUR) yang di-bundling dengan EDC Mandiri / Livin' Merchant. Membantu tim cabang mendeteksi potensi penurunan omzet sebelum menjadi kredit bermasalah (NPL).
+              </p>
+            </div>
+            <div>
+              <button class="btn-gold-mandiri" onclick="switchMainTab('overview', document.querySelectorAll('.tab-btn')[0])">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Overview
+              </button>
+            </div>
+          </div>
+
+          <!-- Micro Stat Widgets -->
+          <div class="kur-metrics-row">
+            <div class="kur-stat-box">
+              <div class="kur-stat-title">Total Debitur Terbundling</div>
+              <div class="kur-stat-val">1,840</div>
+              <div class="kur-stat-sub"><i class="fa-solid fa-circle-check"></i> 100% Menggunakan EDC/QRIS</div>
+            </div>
+            <div class="kur-stat-box">
+              <div class="kur-stat-title">Total Baki Debet Mikro</div>
+              <div class="kur-stat-val">Rp 142.8 M</div>
+              <div class="kur-stat-sub">Rata-rata Plafon: Rp 77.6 Jt</div>
+            </div>
+            <div class="kur-stat-box">
+              <div class="kur-stat-title">Rata-rata Cashflow Coverage</div>
+              <div class="kur-stat-val" style="color: #86efac;">4.6x</div>
+              <div class="kur-stat-sub">Omzet QRIS vs Angsuran Pinjaman</div>
+            </div>
+            <div class="kur-stat-box">
+              <div class="kur-stat-title">Perlu Kunjungan Segera</div>
+              <div class="kur-stat-val" style="color: #fca5a5;">82 Debitur</div>
+              <div class="kur-stat-sub"><i class="fa-solid fa-triangle-exclamation"></i> Rasio Coverage &lt; 1.0x (Kritis)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Debitur Watchlist Data Table -->
+        <div class="table-panel-card">
+          <div class="table-toolbar">
+            <div class="toolbar-left">
+              <div style="font-weight: 700; font-size: 0.95rem; color: #002d62;">
+                <i class="fa-solid fa-list-check" style="color: #7c3aed; margin-right: 6px;"></i>
+                Daftar Debitur Mikro dalam Pantauan Khusus Cabang
+              </div>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn-export" onclick="exportDataToCsv()">
+                <i class="fa-solid fa-download"></i> Unduh Laporan Watchlist
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="merchant-table">
+              <thead>
+                <tr>
+                  <th>Nama Debitur & Usaha</th>
+                  <th>Produk & Plafon Kredit</th>
+                  <th>Baki Debet & Angsuran</th>
+                  <th>Omzet QRIS/EDC Bulan Ini</th>
+                  <th>Coverage Ratio (Cashflow vs Angsuran)</th>
+                  <th>Kolektibilitas</th>
+                  <th>Tindakan Tim Cabang</th>
+                </tr>
+              </thead>
+              <tbody id="debiturTableBody">
+                <!-- Populated dynamically via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =========================================================
+         TAB 3: LOG RIWAYAT AKSI CABANG
+         ========================================================= -->
+    <div id="tabContentLogs" style="display: none;">
+      <div class="table-panel-card">
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            <div style="font-weight: 700; font-size: 0.95rem; color: #002d62;">
+              <i class="fa-solid fa-clock-rotate-left" style="color: #0b5cab; margin-right: 6px;"></i>
+              Log Tindak Lanjut Proaktif & Kunjungan Petugas Cabang
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="merchant-table">
+            <thead>
+              <tr>
+                <th>Waktu Tindakan</th>
+                <th>Merchant / Debitur</th>
+                <th>Jenis Aksi</th>
+                <th>PIC Petugas</th>
+                <th>Catatan & Investigasi</th>
+                <th>Status Eksekusi</th>
+              </tr>
+            </thead>
+            <tbody id="actionLogsTableBody">
+              <!-- Populated dynamically via app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+    </div><!-- /.main-content-wrap -->
+  </div><!-- /.app-layout -->
+
+  <!-- =========================================================
+       MODAL 1: REKOMENDASI CASHBACK & LOYALTY (MERCHANT JUARA)
+       ========================================================= -->
+  <div class="modal-backdrop" id="modalCashback">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-icon-badge" style="background: #fffbeb; color: #d97706;">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+          <div>
+            <div class="modal-title">Rekomendasi Program Cashback & Loyalty</div>
+            <div class="modal-subtitle">Berikan apresiasi bagi Top Merchant / Juara Transaksi</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeCashbackModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitCashbackProgram(event)">
+        <div class="modal-body">
+          
+          <!-- Summary info of merchant -->
+          <div class="modal-merchant-summary-card">
+            <div>
+              <div class="msc-name" id="cashbackName">Nama Merchant</div>
+              <div class="msc-sub">ID: <span id="cashbackMid" class="badge-mid">-</span> • <span id="cashbackBranch">-</span></div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 800; color: #002d62;" id="cashbackVolume">-</div>
+              <div style="font-size: 0.72rem; color: #10b981; font-weight: 600;"><i class="fa-solid fa-crown"></i> Kategori Juara</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Pilih Program Insentif / Retensi</label>
+            <select class="form-select" id="selectProgramType" required>
+              <option value="Cashback MDR 50% (Tier 1 Top Volume)">Cashback Biaya MDR Sebesar 50% (Tier 1 Merchant)</option>
+              <option value="Voucher Livin' Poin Rp 1.500.000">Reward Hadiah Livin' Poin Senilai Rp 1.500.000</option>
+              <option value="Display Banner Promosi Cabang Mandiri">Fasilitasi Banner Promo Livin' Merchant di Area Usaha</option>
+              <option value="Diskon MDR 0% untuk Transaksi QRIS">Gratis Biaya Transaksi QRIS selama 3 Bulan</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Target Volume Transaksi Bulan Depan</label>
+            <input type="text" class="form-input" value="Naik minimum 15% dari rata-rata 3 bulan" placeholder="Target nominal">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Catatan Tambahan untuk Head of Branch & Merchant</label>
+            <textarea class="form-textarea" placeholder="Contoh: Merchant sangat aktif di jam makan siang, program cashback akan meningkatkan adopsi Livin' Paylater dan QRIS Mandiri..."></textarea>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeCashbackModal()">Batal</button>
+          <button type="submit" class="btn-gold-mandiri">
+            <i class="fa-solid fa-paper-plane"></i> Ajukan Program Cashback
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 2: JADWALKAN VISIT / EDUKASI (MERCHANT PASIF / DORMANT)
+       ========================================================= -->
+  <div class="modal-backdrop" id="modalVisit">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-icon-badge" style="background: #fef2f2; color: #dc2626;">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+          <div>
+            <div class="modal-title">Jadwalkan Kunjungan Edukasi & Investigasi</div>
+            <div class="modal-subtitle">Tindak lanjut Early Warning System (EWS) untuk Merchant Pasif</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeVisitModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitVisitSchedule(event)">
+        <div class="modal-body">
+          
+          <div class="modal-merchant-summary-card">
+            <div>
+              <div class="msc-name" id="visitName">Nama Merchant</div>
+              <div class="msc-sub">ID: <span id="visitMid" class="badge-mid">-</span> • <span id="visitBranch">-</span></div>
+            </div>
+            <div style="text-align: right;">
+              <span class="status-badge status-dormant-badge" id="visitStatus">Dormant</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Dugaan Kendala (Diagnosa Awal Sistem)</label>
+            <select class="form-select" id="selectIssue" required>
+              <option value="Mesin EDC Bermasalah / Roll Kertas Habis">Mesin EDC Offline / Roll Kertas Habis / Kerusakan Perangkat</option>
+              <option value="Kasir Baru Belum Diedukasi Cara QRIS">Kasir atau Karyawan Baru Belum Paham Penggunaan QRIS/EDC</option>
+              <option value="Potensi Beralih ke EDC Bank Kompetitor">Indikasi Beralih ke EDC/QRIS Kompetitor</option>
+              <option value="Toko Tutup Sementara / Renovasi">Toko Sedang Tutup Sementara / Masa Renovasi</option>
+              <option value="Keluhan Biaya MDR / Settlement Dana">Kendala Biaya MDR atau Keterlambatan Settlement</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tanggal Rencana Kunjungan</label>
+            <input type="date" class="form-input" id="visitDateInput" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tugaskan Petugas Cabang (Disetujui Branch Manager)</label>
+            <select class="form-select" id="selectPic" required>
+              <option value="Ratna Primasari (Branch Manager Area Gading Serpong)">Ratna Primasari (Branch Manager - Supervisi Khusus)</option>
+              <option value="Fajar Nugraha (Branch Ops KC Gading Serpong)">Fajar Nugraha (Branch Ops KC Gading Serpong)</option>
+              <option value="Raditya Pratama (RM Merchant KCP Springs Summarecon)">Raditya Pratama (RM Merchant KCP Springs Summarecon)</option>
+              <option value="Dian Permata (Mikro Banking Specialist KCP Curug)">Dian Permata (Mikro Banking Specialist KCP Curug)</option>
+              <option value="Budi Santoso (Customer Service KCP Borobudur)">Budi Santoso (Customer Service KCP Borobudur)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Instruksi Kunjungan Petugas</label>
+            <textarea class="form-textarea" placeholder="Bawa mesin EDC cadangan, roll thermal 5 gulung, dan tent card QRIS akrilik terbaru..."></textarea>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeVisitModal()">Batal</button>
+          <button type="submit" class="btn-primary-mandiri" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+            <i class="fa-solid fa-calendar-check"></i> Konfirmasi Jadwal Kunjungan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 3: DETAIL PROFIL LENGKAP MERCHANT
+       ========================================================= -->
+  <div class="modal-backdrop" id="modalDetail">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-icon-badge" style="background: #eff6ff; color: #0b5cab;">
+            <i class="fa-solid fa-store"></i>
+          </div>
+          <div>
+            <div class="modal-title">Profil & Diagnostik Merchant</div>
+            <div class="modal-subtitle">Informasi historis dan riwayat operasional terminal</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeDetailModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-merchant-summary-card">
+          <div>
+            <div class="msc-name" id="detailModalName">-</div>
+            <div class="msc-sub">Pemilik: <strong id="detailModalOwner">-</strong> • MID: <span id="detailModalMid" class="badge-mid">-</span></div>
+          </div>
+          <div>
+            <span class="status-badge status-active-badge" id="detailModalStatus">-</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.7rem; color: #64748b;">Kategori Usaha</div>
+            <div style="font-weight: 700; color: #002d62;" id="detailModalCategory">-</div>
+          </div>
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.7rem; color: #64748b;">Wilayah Cabang</div>
+            <div style="font-weight: 700; color: #002d62;" id="detailModalBranch">-</div>
+          </div>
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.7rem; color: #64748b;">Volume Transaksi Terakhir</div>
+            <div style="font-weight: 700; color: #059669;" id="detailModalVolume">-</div>
+          </div>
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.7rem; color: #64748b;">Nomor Rekening Settlement</div>
+            <div style="font-weight: 700; color: #002d62;">137-00-1928371-4</div>
+          </div>
+        </div>
+
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.85rem; border-radius: 8px;">
+          <div style="font-weight: 700; font-size: 0.82rem; color: #1e3a8a; margin-bottom: 0.35rem;">
+            <i class="fa-solid fa-robot"></i> Rekomendasi Algoritma EWS Bank Mandiri:
+          </div>
+          <p style="font-size: 0.78rem; color: #1e40af; line-height: 1.4;">
+            Merchant memiliki basis pelanggan loyal. Dianjurkan memperbanyak materi promosi pembayaran non-tunai menggunakan QRIS Livin' Mandiri dan penempatan akrilik di kasir utama.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeDetailModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 4: AKSI CABANG DEBITUR KUR & KUM
+       ========================================================= -->
+  <div class="modal-backdrop" id="modalDebiturAction">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-icon-badge" style="background: #f5f3ff; color: #7c3aed;">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+          <div>
+            <div class="modal-title">Aksi Tim Cabang: Debitur Mikro KUM/KUR</div>
+            <div class="modal-subtitle">Tindakan pencegahan risiko kredit & asistensi cashflow</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeDebiturActionModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitDebiturAction(event)">
+        <div class="modal-body">
+          <div class="modal-merchant-summary-card">
+            <div>
+              <div class="msc-name" id="debModalName">-</div>
+              <div class="msc-sub">ID: <span id="debModalId" class="badge-mid">-</span> • <span id="debModalProduct">-</span></div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.72rem; color: #64748b;">Rasio Coverage</div>
+              <div style="font-weight: 800; color: #7c3aed;" id="debModalCoverage">-</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 0.7rem; color: #64748b;">Angsuran Per Bulan</div>
+              <div style="font-weight: 700; color: #dc2626;" id="debModalAngsuran">-</div>
+            </div>
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 0.7rem; color: #64748b;">Omzet QRIS Bulan Ini</div>
+              <div style="font-weight: 700; color: #0b5cab;" id="debModalOmzet">-</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Pilih Jenis Tindakan Cabang</label>
+            <select class="form-select" id="selectDebAction" required>
+              <option value="Kunjungan Investigasi Usaha & Cashflow">Kunjungan Investigasi Cashflow Usaha Debitur (On-Site)</option>
+              <option value="Edukasi Digital & Penggantian QRIS">Edukasi Transaksi Non-Tunai & Penempatan QRIS Baru</option>
+              <option value="Simulasi Restrukturisasi Angsuran">Simulasi Perpanjangan Tenor / Restrukturisasi Kredit</option>
+              <option value="Penawaran Top-Up Plafon (Debitur Sehat)">Penawaran Top-Up Modal Kerja (Khusus Debitur Sehat)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Catatan Analis Mikro Cabang</label>
+            <textarea class="form-textarea" placeholder="Catatan kondisi stok barang, keramaian toko, atau kendala pembeli..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeDebiturActionModal()">Batal</button>
+          <button type="submit" class="btn-primary-mandiri" style="background: linear-gradient(135deg, #7c3aed, #5b21b6);">
+            <i class="fa-solid fa-check"></i> Proses Tindakan Debitur
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       FLOATING TOAST NOTIFICATION STACK
+       ========================================================= -->
+  <div class="toast-stack" id="toastStack"></div>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
