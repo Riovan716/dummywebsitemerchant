@@ -62,6 +62,22 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  min-width: 0; /* flex/grid children can shrink below content size */
+}
+
+/* Re-allow images and SVG to size naturally */
+img, svg, canvas, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
 }
 
 body {
@@ -71,6 +87,9 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Scrollbar customization */
@@ -96,7 +115,9 @@ body {
   display: flex;
   min-height: 100vh;
   width: 100%;
+  max-width: 100%;
   position: relative;
+  overflow-x: hidden; /* clip sidebar slide-in overflow */
 }
 
 /* Sidebar Styling (Solid Mandiri Blue & Yellow) */
@@ -367,10 +388,14 @@ body {
 .main-content-wrap {
   flex: 1;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-page);
+  position: relative;
+  overflow-x: hidden;
 }
 
 .top-header-bar {
@@ -380,18 +405,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 0.75rem;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 10px rgba(0, 45, 98, 0.08);
-  flex-wrap: wrap;
+  /* NO flex-wrap — keep everything in one row */
+  flex-wrap: nowrap;
+  min-height: 60px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .header-left-title {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+  min-width: 0;        /* allow text truncation */
+  flex-shrink: 1;
+  overflow: hidden;
 }
 
 .header-mobile-toggle {
@@ -422,13 +455,17 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-controls {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;   /* stay in one row */
+  flex-shrink: 0;      /* never shrink — left side does */
 }
 
 .header-select-box {
@@ -627,9 +664,12 @@ body {
    MAIN LAYOUT & CONTAINER
    ========================================================= */
 .main-wrapper {
+  width: 100%;
   max-width: 1600px;
   margin: 0 auto;
   padding: 1.5rem 1.75rem 3.5rem;
+  overflow-x: hidden; /* prevent child cards from expanding beyond viewport */
+  box-sizing: border-box;
 }
 
 /* Tab Navigation */
@@ -712,6 +752,8 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
   margin-bottom: 1.75rem;
+  width: 100%;
+  max-width: 100%;
 }
 
 .kpi-card {
@@ -726,6 +768,9 @@ body {
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
 .kpi-card:hover {
@@ -1142,6 +1187,9 @@ body {
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .table-toolbar {
@@ -1152,6 +1200,10 @@ body {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .toolbar-left {
@@ -1160,13 +1212,19 @@ body {
   gap: 0.75rem;
   flex-wrap: wrap;
   flex-grow: 1;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .search-box-wrap {
   position: relative;
-  min-width: 280px;
+  width: 100%;           /* fills toolbar-left, never pushes past it */
   max-width: 380px;
+  min-width: 0;
   flex-grow: 1;
+  box-sizing: border-box;
+  /* min-width removed — was causing horizontal overflow on mobile */
 }
 
 .search-input {
@@ -1555,6 +1613,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;          /* clip to parent */
+  overflow-x: hidden;
 }
 
 .kur-hero-card {
@@ -1563,7 +1623,12 @@ body {
   border-radius: var(--radius-xl);
   padding: 1.75rem 2rem;
   position: relative;
-  overflow: hidden;
+  overflow: hidden;     /* clips the decorative circle pseudo-element */
+  width: 100%;          /* always fits its column */
+  max-width: 100%;      /* no overflow */
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: break-word;
   box-shadow: 0 10px 25px rgba(0, 56, 118, 0.3) !important;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -1690,8 +1755,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(6px);
   z-index: 1000;
@@ -1941,8 +2008,9 @@ body {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  min-width: 320px;
+  /* min-width removed — was causing horizontal overflow on small screens */
   max-width: 420px;
+  width: max-content;
   border-left: 4px solid var(--mandiri-blue);
   pointer-events: auto;
   animation: slide-toast 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1975,24 +2043,28 @@ body {
 }
 
 /* =========================================================
-   RESPONSIVENESS (MOBILE & TABLET)
+   RESPONSIVENESS (MOBILE & TABLET) - COMPREHENSIVE
    ========================================================= */
 .sidebar-overlay {
   display: none;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 22, 46, 0.6);
   backdrop-filter: blur(4px);
   z-index: 190;
+  transition: opacity 0.3s ease;
 }
 
 .sidebar-overlay.active {
   display: block;
 }
 
+/* ── Large Screens: 1200px ── */
 @media (max-width: 1200px) {
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2003,9 +2075,23 @@ body {
   .kur-metrics-row {
     grid-template-columns: repeat(2, 1fr);
   }
+  .pie-summary-wrapper {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .pie-chart-box {
+    flex: 0 0 200px;
+  }
+  .pie-legend-list {
+    flex: 1;
+    margin-top: 0;
+  }
 }
 
+/* ── Tablet / Laptop: 1024px ── */
 @media (max-width: 1024px) {
+
+  /* Sidebar becomes a slide-in drawer */
   .app-sidebar {
     position: fixed;
     top: 0;
@@ -2013,39 +2099,429 @@ body {
     bottom: 0;
     transform: translateX(-100%);
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  
+
   .app-sidebar.open {
     transform: translateX(0);
   }
 
+  /* Show hamburger button */
   .header-mobile-toggle {
     display: inline-flex;
   }
+
+  /* ────────────────────────────────────────────────────
+     FIXED HEADER — anchored to the VIEWPORT, not to
+     any scrollable parent. This means it NEVER moves,
+     regardless of horizontal or vertical scrolling.
+  ──────────────────────────────────────────────────── */
+  .top-header-bar {
+    position: fixed;
+    top: 0;
+    left: 0;               /* always start at left edge of screen */
+    right: 0;              /* always end at right edge of screen */
+    width: 100%;           /* 100% of viewport width */
+    max-width: 100%;
+    z-index: 150;
+    box-sizing: border-box;
+    overflow: hidden;      /* clip anything that might try to overflow it */
+  }
+
+  /* Push content down below the fixed 63px header */
+  .main-content-wrap {
+    padding-top: 63px;
+  }
+
+  .main-wrapper {
+    padding: 1.25rem 1.25rem 3rem;
+  }
+
+  .kpi-main-value {
+    font-size: 1.6rem;
+  }
+
+  .kur-hero-card {
+    padding: 1.35rem 1.5rem;
+  }
+
+  .kur-hero-title {
+    font-size: 1.15rem;
+  }
 }
 
+/* ── Tablet Portrait: 768px ── */
 @media (max-width: 768px) {
+
+  /* Compact the fixed header further */
   .top-header-bar {
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 1rem;
+    gap: 0.5rem;
+    min-height: 52px;
   }
-  .main-wrapper {
-    padding: 1rem 1rem 2.5rem;
+
+  /* Re-adjust content offset for shorter header */
+  .main-content-wrap {
+    padding-top: 55px;
   }
-  .kpi-grid {
-    grid-template-columns: 1fr;
+
+  /* Hide the EWS LIVE badge tag inside header title */
+  .header-page-title .tag-ews {
+    display: none;
   }
+
+  /* Truncate long title text with ellipsis */
+  .header-page-title {
+    font-size: 0.88rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  /* Hide subtitle line below title */
+  .header-left-title > div > div:last-child {
+    display: none;
+  }
+
   .header-controls {
-    width: 100%;
-    justify-content: space-between;
+    gap: 0.4rem;
+    flex-shrink: 0;
   }
+
+  /* Hide period selector, keep branch + bell */
+  .header-controls .header-select-box:nth-child(2) {
+    display: none;
+  }
+
+  /* Shrink branch select */
+  .header-select-box .header-select {
+    font-size: 0.72rem;
+    max-width: 110px;
+  }
+
+  .main-wrapper {
+    padding: 0.85rem 0.85rem 2.5rem;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+
+  .kpi-card {
+    padding: 1rem;
+  }
+
+  .kpi-main-value {
+    font-size: 1.45rem;
+  }
+
+  .kpi-breakdown-row {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+
+  .widgets-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .pie-summary-wrapper {
+    flex-direction: column;
+  }
+
+  .pie-chart-box {
+    min-height: 180px;
+  }
+
+  .ews-alert-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .ews-strip-actions {
+    width: 100%;
+  }
+
+  .btn-ews-filter {
+    width: 100%;
+    justify-content: center;
+  }
+
   .table-toolbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
   }
+
+  .toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .search-box-wrap {
     max-width: 100%;
+    min-width: unset;
   }
+
+  .filter-pills-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .status-filter-pill {
+    flex-shrink: 0;
+  }
+
+  .toolbar-right {
+    width: 100%;
+  }
+
+  .select-filter-service {
+    width: 100%;
+  }
+
+  .kur-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .kur-hero-card {
+    padding: 1.15rem 1.25rem;
+  }
+
+  .kur-hero-title {
+    font-size: 1.05rem;
+  }
+
+  .kur-hero-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .btn-gold-mandiri {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Modal full-width on mobile */
+  .modal-container {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-body {
+    padding: 1.15rem;
+    gap: 1rem;
+  }
+
+  .modal-header {
+    padding: 1rem 1.15rem;
+  }
+
+  .modal-footer {
+    padding: 0.85rem 1.15rem;
+  }
+
+  /* Toast on mobile */
+  .toast-stack {
+    bottom: 1rem;
+    right: 0.75rem;
+    left: 0.75rem;
+  }
+
+  .toast-item {
+    min-width: unset;
+    max-width: 100%;
+  }
+
+  .table-pagination-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+}
+
+/* ── Mobile: 640px ── */
+@media (max-width: 640px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .kpi-card {
+    padding: 0.9rem;
+  }
+
+  .kpi-main-value {
+    font-size: 1.65rem;
+  }
+
+  .kpi-breakdown-row {
+    flex-direction: row;
+    font-size: 0.7rem;
+  }
+
+  .kur-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .merchant-table th,
+  .merchant-table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .widget-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .widget-actions {
+    width: 100%;
+  }
+
+  .pill-toggle-group {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .pill-toggle-btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .header-page-title .tag-ews {
+    display: none;
+  }
+
+  .sidebar-user-box {
+    margin: 0.9rem 0.75rem 0.6rem;
+    padding: 0.75rem;
+  }
+
+  .sidebar-nav {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .sidebar-nav-item {
+    padding: 0.75rem 0.85rem;
+  }
+}
+
+/* ── Small Mobile: 480px ── */
+@media (max-width: 480px) {
+  .top-header-bar {
+    padding: 0.5rem 0.65rem;
+  }
+
+  .header-page-title {
+    font-size: 0.78rem;
+    gap: 0.3rem;
+  }
+
+  /* On very small screens, hide branch select too — only bell remains */
+  .header-controls .header-select-box {
+    display: none;
+  }
+
+  .main-wrapper {
+    padding: 0.65rem 0.65rem 2rem;
+  }
+
+  .kpi-main-value {
+    font-size: 1.5rem;
+  }
+
   .kur-metrics-row {
     grid-template-columns: 1fr;
   }
+
+  .kur-stat-val {
+    font-size: 1.2rem;
+  }
+
+  .ews-badge-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .ews-message-title {
+    font-size: 0.82rem;
+  }
+
+  .ews-message-desc {
+    font-size: 0.73rem;
+  }
+
+  .action-buttons-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  .btn-action-cashback,
+  .btn-action-visit,
+  .btn-action-detail {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.68rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  /* Tighten modal even further */
+  .modal-merchant-summary-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .modal-footer > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page-btn {
+    min-width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
+  }
 }
+
+/* ── Landscape Mobile (height constrained) ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app-sidebar {
+    overflow-y: auto;
+  }
+
+  .modal-container {
+    max-height: 98vh;
+  }
+
+  .modal-body {
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+}
+

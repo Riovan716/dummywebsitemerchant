@@ -936,6 +936,7 @@ window.switchMainTab = function (tabName, btnEl) {
     const overlay = document.getElementById("sidebarOverlay");
     if (sidebar) sidebar.classList.remove("open");
     if (overlay) overlay.classList.remove("active");
+    document.body.style.overflow = "";
   }
 };
 
@@ -971,13 +972,7 @@ window.quickFilterFromSidebar = function (status) {
   );
 };
 
-// Toggle Mobile Sidebar Drawer
-window.toggleSidebar = function () {
-  const sidebar = document.getElementById("appSidebar");
-  const overlay = document.getElementById("sidebarOverlay");
-  if (sidebar) sidebar.classList.toggle("open");
-  if (overlay) overlay.classList.toggle("active");
-};
+// toggleSidebar → defined below in MOBILE SIDEBAR TOGGLE section
 
 // Filter quick button from EWS alert strip
 window.filterDormantOnly = function () {
@@ -1212,3 +1207,61 @@ function showToast(title, desc, type = "success") {
     }, 300);
   }, 4000);
 }
+
+// =========================================================
+// MOBILE SIDEBAR TOGGLE & RESPONSIVE UTILITIES
+// =========================================================
+
+/**
+ * Toggle the mobile sidebar open/closed.
+ * Called by the hamburger button in the header and by the overlay backdrop.
+ */
+function toggleSidebar() {
+  const sidebar = document.getElementById("appSidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  if (!sidebar || !overlay) return;
+
+  const isOpen = sidebar.classList.contains("open");
+
+  if (isOpen) {
+    // Close
+    sidebar.classList.remove("open");
+    overlay.classList.remove("active");
+    document.body.style.overflow = "";
+  } else {
+    // Open
+    sidebar.classList.add("open");
+    overlay.classList.add("active");
+    // Prevent body scroll when sidebar is open on mobile
+    document.body.style.overflow = "hidden";
+  }
+}
+
+/**
+ * Close sidebar when window is resized back to desktop width.
+ */
+function closeSidebarOnResize() {
+  const sidebar = document.getElementById("appSidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  if (!sidebar || !overlay) return;
+
+  if (window.innerWidth > 1024) {
+    sidebar.classList.remove("open");
+    overlay.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+}
+
+// Auto-close sidebar when resizing to desktop
+window.addEventListener("resize", closeSidebarOnResize);
+
+// Close sidebar when pressing Escape key
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") {
+    const sidebar = document.getElementById("appSidebar");
+    if (sidebar && sidebar.classList.contains("open")) {
+      toggleSidebar();
+    }
+  }
+});
+
